@@ -30,9 +30,16 @@ export function CreateWorkoutDialog({
     if (!name) {
       return;
     }
+
     try {
       setLoading(true);
-      await createWorkout({ name, notes, date });
+
+      // transforma YYYY-MM-DD → DD/MM/YYYY
+      const [year, month, day] = date.split("-");
+      const formattedDate = `${day}/${month}/${year}`;
+
+      await createWorkout({ name, notes, date: formattedDate });
+
       setName("");
       setNotes("");
       onOpenChange(false);
@@ -42,10 +49,9 @@ export function CreateWorkoutDialog({
       setLoading(false);
     }
   };
-
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
-      <DialogContent>
+      <DialogContent aria-describedby="fix">
         <DialogHeader>
           <DialogTitle>Novo treino</DialogTitle>
         </DialogHeader>

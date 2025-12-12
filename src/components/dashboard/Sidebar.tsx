@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import type { WorkoutFilters } from "@/hooks/useWorkouts";
 
 type Props = {
   onCreate: () => void;
-  onFilter: (filters: { q?: string; from?: string; to?: string }) => void;
+  onFilter: (filters: WorkoutFilters) => void;
 };
 
 export function Sidebar({ onCreate, onFilter }: Props) {
@@ -24,20 +25,20 @@ export function Sidebar({ onCreate, onFilter }: Props) {
         </label>
         <Input
           id="search-input"
-          onChange={(e) => onFilter({ q: e.target.value })}
+          onChange={(e) => onFilter({ query: e.target.value })}
           placeholder="Nome do treino"
         />
       </div>
 
       <div className="mt-4">
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2">
           <div className="flex-1">
             <label className="text-sm" htmlFor="from-date">
               De
             </label>
             <Input
               id="from-date"
-              onChange={(e) => onFilter({ from: e.target.value })}
+              onChange={(e) => onFilter({ fromDate: e.target.value })}
               type="date"
             />
           </div>
@@ -47,7 +48,7 @@ export function Sidebar({ onCreate, onFilter }: Props) {
             </label>
             <Input
               id="to-date"
-              onChange={(e) => onFilter({ to: e.target.value })}
+              onChange={(e) => onFilter({ toDate: e.target.value })}
               type="date"
             />
           </div>

@@ -1,116 +1,92 @@
 /** biome-ignore-all lint/style/useFilenamingConvention: # */
-import { useMemo, useState } from "react";
-import {
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { useState } from "react";
 import { CreateWorkoutDialog } from "@/components/dashboard/CreateWorkoutDialog";
-import { Header } from "@/components/dashboard/header";
-import { Sidebar } from "@/components/dashboard/sidebar";
+import { Header } from "@/components/dashboard/Header";
+import { Sidebar } from "@/components/dashboard/Sidebar";
 import { WorkoutCard } from "@/components/dashboard/WorkoutCard";
 import { WorkoutModal } from "@/components/dashboard/WorkoutModal";
-import { useWorkouts } from "@/hooks/useWorkouts";
+import { useWorkouts, type WorkoutFilters } from "@/hooks/useWorkouts";
 
 export default function DashboardPage() {
-  const { workouts, loading, fetchWorkouts } = useWorkouts();
+  const { workoutList, loading, fetchWorkouts } = useWorkouts();
   const [createOpen, setCreateOpen] = useState(false);
-  // biome-ignore lint/suspicious/noExplicitAny: ##
+  // biome-ignore lint/suspicious/noExplicitAny: #
   const [selected, setSelected] = useState<any | null>(null);
 
-  // Data para gráfico: soma de cargas por dia (exemplo simples)
-  const chartData = useMemo(() => {
-    // transforma workouts em pontos por data com soma de cargas (se houver)
-    const map: Record<string, number> = {};
-    for (const w of workouts) {
-      const day = new Date(w.date).toLocaleDateString();
-      const sum = (w.exercises ?? []).reduce(
-        (acc, ex) => acc + ex.weight * (ex.reps ?? 0) * (ex.series ?? 1),
-        0
-      );
-      map[day] = (map[day] || 0) + sum;
-    }
-    return Object.entries(map).map(([date, value]) => ({ date, value }));
-  }, [workouts]);
-
-  const handleFilter = (filters: {
-    q?: string;
-    from?: string;
-    to?: string;
-  }) => {
+  const handleFilter = (filters: WorkoutFilters) => {
     fetchWorkouts(filters);
   };
 
   return (
     <div className="flex h-screen">
       <Sidebar onCreate={() => setCreateOpen(true)} onFilter={handleFilter} />
-      <div className="flex flex-1 flex-col">
+
+      <div className="flex flex-1 flex-col bg-muted/30">
         <Header userName="Leandro" />
+
         <main className="p-6">
           <section className="grid grid-cols-3 gap-6">
-            <div className="col-span-2">
-              <div className="rounded border bg-white p-4 shadow-sm">
-                <h3 className="font-semibold">Evolução</h3>
-                <div className="mt-4" style={{ height: 220 }}>
-                  <ResponsiveContainer height="100%" width="100%">
-                    <LineChart data={chartData}>
-                      <XAxis dataKey="date" />
-                      <YAxis />
-                      <Tooltip />
-                      <Line
-                        dataKey="value"
-                        stroke="#4f46e5"
-                        strokeWidth={2}
-                        type="monotone"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
+            {/* ÁREA PRINCIPAL */}
+            <div className="col-span-2 flex flex-col gap-6">
+              <div className="flex items-center justify-between">
+                <h2 className="font-semibold text-xl">Seus Treinos</h2>
               </div>
 
-              <div className="mt-6 grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 {/** biome-ignore lint/nursery/noLeakedRender: # */}
-                {loading && <div>Carregando...</div>}
-                {!loading && workouts.length === 0 && (
-                  <div className="text-muted-foreground">
-                    Nenhum treino ainda.
+                {loading && (
+                  <div className="text-muted-foreground text-sm">
+                    Carregando treinos…
                   </div>
                 )}
+
+                {!loading && workoutList.length === 0 && (
+                  <div className="text-muted-foreground text-sm">
+                    Nenhum treino encontrado.
+                  </div>
+                )}
+
                 {!loading &&
-                  workouts.map((w: (typeof workouts)[number]) => (
+                  workoutList.map((w) => (
                     <WorkoutCard
                       key={w.id}
-                      onOpen={(wk: (typeof workouts)[number]) =>
-                        setSelected(wk)
-                      }
+                      onOpen={(wk) => setSelected(wk)}
                       workout={w}
                     />
                   ))}
               </div>
             </div>
 
+            {/* PAINEL DIREITO – Reformulado */}
             <aside className="col-span-1">
-              <div className="rounded border p-4">
-                <h4 className="font-semibold">Resumo</h4>
-                <p className="mt-2 text-muted-foreground text-sm">
-                  Total de treinos: {workouts.length}
-                </p>
-                <p className="mt-1 text-muted-foreground text-sm">
-                  Última atualização:{" "}
-                  {workouts[0]
-                    ? new Date(workouts[0].date).toLocaleDateString()
-                    : "—"}
-                </p>
-              </div>
+              <div className="grid grid-cols-2 gap-4">
+                {/* CARD: RESUMO */}
+                <div className="flex flex-col items-center rounded-xl border p-5 shadow-sm">
+                  <h4 className="font-semibold text-lg">Resumo</h4>
 
-              <div className="mt-4">
-                <h4 className="font-semibold">Ações rápidas</h4>
-                <div className="mt-2 flex flex-col gap-2">
+                  <p className="mt-3 text-center text-muted-foreground text-sm">
+                    Total de treinos:
+                    <br />
+                    <span className="font-bold text-primary text-xl">
+                      {workoutList.length}
+                    </span>
+                  </p>
+
+                  <p className="mt-2 text-center text-muted-foreground text-xs">
+                    Última atualização:
+                    <br />
+                    {workoutList[0]
+                      ? new Date(workoutList[0].date).toLocaleDateString()
+                      : "—"}
+                  </p>
+                </div>
+
+                {/* CARD: AÇÕES */}
+                <div className="flex flex-col items-center justify-center rounded-xl border p-5 shadow-sm">
+                  <h4 className="text-center font-semibold text-lg">Ações</h4>
+
                   <button
-                    className="btn"
+                    className="btn mt-4 w-full"
                     onClick={() => setCreateOpen(true)}
                     type="button"
                   >
@@ -124,6 +100,7 @@ export default function DashboardPage() {
       </div>
 
       <CreateWorkoutDialog onOpenChange={setCreateOpen} open={createOpen} />
+
       <WorkoutModal
         onClose={() => setSelected(null)}
         open={!!selected}

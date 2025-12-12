@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { workoutApi } from "@/services/api";
-import { extractApiError } from "@/utiils/extractApiError";
+import { extractApiError } from "@/utils/extractApiError";
 
 export function RegisterPage() {
   const [email, setEmail] = useState("");
