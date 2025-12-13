@@ -51,7 +51,7 @@ export function CreateWorkoutDialog({
   };
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
-      <DialogContent aria-describedby="fix">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Novo treino</DialogTitle>
         </DialogHeader>

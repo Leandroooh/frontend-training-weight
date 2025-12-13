@@ -1,10 +1,10 @@
 /** biome-ignore-all lint/style/useFilenamingConvention: # */
 import { useState } from "react";
-import { CreateWorkoutDialog } from "@/components/dashboard/CreateWorkoutDialog";
 import { Header } from "@/components/dashboard/Header";
+import { CreateWorkoutDialog } from "@/components/dashboard/modals/CreateWorkoutDialog";
+import { WorkoutModal } from "@/components/dashboard/modals/WorkoutModal";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { WorkoutCard } from "@/components/dashboard/WorkoutCard";
-import { WorkoutModal } from "@/components/dashboard/WorkoutModal";
 import { useWorkouts, type WorkoutFilters } from "@/hooks/useWorkouts";
 
 export default function DashboardPage() {

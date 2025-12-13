@@ -1,24 +1,26 @@
 export function extractApiError(error: unknown): string {
-  // Erro vindo do Axios
-  if (
-    typeof error === "object" &&
-    error !== null &&
-    "response" in error &&
-    // biome-ignore lint/suspicious/noExplicitAny: Utils
-    typeof (error as any).response === "object"
-  ) {
-    // biome-ignore lint/suspicious/noExplicitAny: Utils
+  if (typeof error === "object" && error !== null && "response" in error) {
     const axiosError = error as any;
     const data = axiosError.response?.data;
 
-    if (data?.message) {
+    // Caso 1: backend já retorna uma mensagem limpa
+    if (typeof data?.message === "string") {
       return data.message;
+    }
+
+    // Caso 2: erro de validação (Zod, etc)
+    if (Array.isArray(data?.issues)) {
+      return data.issues[0]?.message ?? "Dados inválidos.";
+    }
+
+    if (Array.isArray(data?.errors)) {
+      return data.errors[0]?.message ?? "Dados inválidos.";
     }
 
     return "Erro desconhecido retornado pelo servidor.";
   }
 
-  // Erro genérico
+  // Erro genérico JS
   if (error instanceof Error && error.message) {
     return error.message;
   }
