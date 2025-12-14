@@ -86,7 +86,6 @@ export function useWorkouts() {
           },
         });
 
-        // 🟢 Destaque: adiciona o novo treino no início da lista existente
         setWorkoutList((currentData) => [response.data, ...currentData]);
 
         toast.success("Treino criado com sucesso!");

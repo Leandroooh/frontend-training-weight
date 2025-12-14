@@ -4,14 +4,17 @@ import { CreateWorkoutDialog } from "@/components/dashboard/modals/CreateWorkout
 import { WorkoutModal } from "@/components/dashboard/modals/WorkoutModal";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { WorkoutCard } from "@/components/dashboard/WorkoutCard";
-import { useWorkouts, type WorkoutFilters } from "@/hooks/useWorkouts";
+import {
+  useWorkouts,
+  type Workout,
+  type WorkoutFilters,
+} from "@/hooks/useWorkouts";
 
 export default function DashboardPage() {
   const { workoutList, loading, fetchWorkouts } = useWorkouts();
 
   const [createOpen, setCreateOpen] = useState(false);
-  // biome-ignore lint/suspicious/noExplicitAny: #
-  const [selected, setSelected] = useState<any | null>(null);
+  const [selected, setSelected] = useState<Workout | null>(null);
 
   // 🔑 CONTROLE CENTRAL
   const [sidebarOpen, setSidebarOpen] = useState(false);
