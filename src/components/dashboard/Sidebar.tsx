@@ -9,10 +9,12 @@ type Props = {
 
 export function Sidebar({ onCreate, onFilter }: Props) {
   return (
-    <aside className="flex h-screen w-64 flex-col gap-4 border-r p-4">
+    <aside className="flex h-screen w-64 flex-col gap-4 border-r px-4 py-8">
       <div className="mb-4">
-        <h3 className="font-semibold text-lg">Treinos</h3>
-        <p className="text-muted-foreground text-sm">Gerencie seus treinos</p>
+        <h3 className="font-bold text-lg">Dravyx</h3>
+        <p className="text-muted-foreground text-sm">
+          Acompanhando suas Cargas!
+        </p>
       </div>
 
       <div>
