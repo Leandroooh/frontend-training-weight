@@ -2,6 +2,7 @@ import Cookies from "js-cookie";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { workoutApi } from "@/services/api";
+import { normalizeWorkoutDate } from "@/utils/normalizeWorkout";
 
 type WorkoutFilters = {
   fromDate?: string;
@@ -61,9 +62,8 @@ export function useWorkouts() {
           }
         );
 
-        // 🟢 Destaque: extrai apenas o array de dados do response
         const data = Array.isArray(response.data.data)
-          ? response.data.data
+          ? response.data.data.map(normalizeWorkoutDate)
           : [];
 
         setWorkoutList(data);
@@ -86,7 +86,10 @@ export function useWorkouts() {
           },
         });
 
-        setWorkoutList((currentData) => [response.data, ...currentData]);
+        setWorkoutList((currentData) => [
+          normalizeWorkoutDate(response.data),
+          ...currentData,
+        ]);
 
         toast.success("Treino criado com sucesso!");
         return response.data;
@@ -99,11 +102,33 @@ export function useWorkouts() {
     [token]
   );
 
+  const deleteWorkout = useCallback(
+    async (id: string) => {
+      try {
+        await workoutApi.delete(`/workout/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setWorkoutList((currentData) =>
+          currentData.filter((workout) => workout.id !== id)
+        );
+
+        toast.success("Treino excluído com sucesso!");
+      } catch (err) {
+        toast.error("Erro ao excluir treino");
+        console.error(err);
+      }
+    },
+    [token]
+  );
+
   useEffect(() => {
     fetchWorkouts();
   }, [fetchWorkouts]);
 
-  return { workoutList, loading, fetchWorkouts, createWorkout };
+  return { workoutList, loading, fetchWorkouts, createWorkout, deleteWorkout };
 }
 
 export type { WorkoutFilters, Workout, ExerciseEntry, createWorkoutData };

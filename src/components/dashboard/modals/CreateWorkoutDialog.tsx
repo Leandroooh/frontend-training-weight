@@ -9,21 +9,25 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useWorkouts } from "@/hooks/useWorkouts";
+
+type CreateWorkoutPayload = {
+  name: string;
+  notes?: string;
+  date: string;
+};
 
 export function CreateWorkoutDialog({
   open,
   onOpenChange,
+  onCreate,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
+  onCreate: (data: CreateWorkoutPayload) => Promise<void>;
 }) {
-  const { createWorkout } = useWorkouts();
   const [name, setName] = useState("");
   const [notes, setNotes] = useState("");
-  const [date, setDate] = useState<string>(
-    new Date().toISOString().slice(0, 10)
-  );
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [loading, setLoading] = useState(false);
 
   const handleCreate = async () => {
@@ -34,21 +38,16 @@ export function CreateWorkoutDialog({
     try {
       setLoading(true);
 
-      // transforma YYYY-MM-DD → DD/MM/YYYY
-      const [year, month, day] = date.split("-");
-      const formattedDate = `${day}/${month}/${year}`;
-
-      await createWorkout({ name, notes, date: formattedDate });
+      await onCreate({ name, notes, date });
 
       setName("");
       setNotes("");
       onOpenChange(false);
-    } catch {
-      // createWorkout já emite toast
     } finally {
       setLoading(false);
     }
   };
+
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent>
@@ -66,6 +65,7 @@ export function CreateWorkoutDialog({
             placeholder="Ex: Pernas - Força"
             value={name}
           />
+
           <label className="text-sm" htmlFor="date">
             Data
           </label>
@@ -75,6 +75,7 @@ export function CreateWorkoutDialog({
             type="date"
             value={date}
           />
+
           <label className="text-sm" htmlFor="notes">
             Notas
           </label>

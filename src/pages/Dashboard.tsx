@@ -11,7 +11,8 @@ import {
 } from "@/hooks/useWorkouts";
 
 export default function DashboardPage() {
-  const { workoutList, loading, fetchWorkouts } = useWorkouts();
+  const { workoutList, loading, fetchWorkouts, createWorkout, deleteWorkout } =
+    useWorkouts();
 
   const [createOpen, setCreateOpen] = useState(false);
   const [selected, setSelected] = useState<Workout | null>(null);
@@ -21,6 +22,10 @@ export default function DashboardPage() {
 
   const handleFilter = (filters: WorkoutFilters) => {
     fetchWorkouts(filters);
+  };
+
+  const deleteCard = (id: string) => {
+    deleteWorkout(id);
   };
 
   return (
@@ -61,6 +66,7 @@ export default function DashboardPage() {
                   workoutList.map((w) => (
                     <WorkoutCard
                       key={w.id}
+                      onDelete={deleteCard}
                       onOpen={(wk) => setSelected(wk)}
                       workout={w}
                     />
@@ -71,7 +77,13 @@ export default function DashboardPage() {
         </main>
       </div>
 
-      <CreateWorkoutDialog onOpenChange={setCreateOpen} open={createOpen} />
+      <CreateWorkoutDialog
+        onCreate={async (data) => {
+          await createWorkout(data);
+        }}
+        onOpenChange={setCreateOpen}
+        open={createOpen}
+      />
 
       <WorkoutModal
         onClose={() => setSelected(null)}
