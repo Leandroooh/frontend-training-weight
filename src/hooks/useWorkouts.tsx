@@ -28,6 +28,11 @@ type PaginatedResponse<T> = {
   data: T[];
 };
 
+type DateRangeParams = {
+  fromDate?: string;
+  toDate?: string;
+};
+
 type ExerciseEntry = {
   id: string;
   exercise: string;
@@ -55,7 +60,10 @@ export function useWorkouts() {
         const response = await workoutApi.get<PaginatedResponse<Workout>>(
           "/workouts",
           {
-            params,
+            params: {
+              from: params?.fromDate,
+              to: params?.toDate,
+            },
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -124,11 +132,45 @@ export function useWorkouts() {
     [token]
   );
 
+  const fetchWorkoutsByDateRange = useCallback(
+    async (params: DateRangeParams) => {
+      const response = await workoutApi.get<PaginatedResponse<Workout>>(
+        "/workouts",
+        {
+          params: {
+            from: params.fromDate,
+            to: params.toDate,
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = Array.isArray(response.data.data)
+        ? response.data.data.map(normalizeWorkoutDate)
+        : [];
+
+      return {
+        pagination: response.data.pagination,
+        data,
+      };
+    },
+    [token]
+  );
+
   useEffect(() => {
     fetchWorkouts();
   }, [fetchWorkouts]);
 
-  return { workoutList, loading, fetchWorkouts, createWorkout, deleteWorkout };
+  return {
+    workoutList,
+    loading,
+    fetchWorkouts,
+    createWorkout,
+    deleteWorkout,
+    fetchWorkoutsByDateRange,
+  };
 }
 
 export type { WorkoutFilters, Workout, ExerciseEntry, createWorkoutData };

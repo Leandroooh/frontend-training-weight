@@ -16,7 +16,8 @@ function SidebarContent({
   onCreate,
   onFilter,
   totalWorkouts,
-}: Omit<SidebarProps, "open" | "onOpenChange">) {
+  onOpenChange,
+}: Omit<SidebarProps, "open">) {
   return (
     <aside className="flex h-full w-72 flex-col gap-4 bg-neutral-950 px-4 py-8">
       <div>
@@ -53,7 +54,10 @@ function SidebarContent({
 
       <Button
         className="h-12 w-full bg-neutral-800 text-white hover:bg-neutral-700"
-        onClick={onCreate}
+        onClick={() => {
+          onCreate();
+          onOpenChange(false);
+        }}
       >
         <PlusCircle className="mr-2 text-green-400" />
         Novo Treino

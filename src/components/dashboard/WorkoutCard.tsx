@@ -32,7 +32,7 @@ export function WorkoutCard({
         <h3 className="font-semibold text-lg leading-tight">{workout.name}</h3>
 
         <p className="mt-2 line-clamp-2 text-muted-foreground text-sm">
-          {workout.notes ?? "—"}
+          {workout.notes === "" ? "Sem notas" : (workout.notes ?? "Treino")}
         </p>
 
         <div className="mt-4 flex items-end justify-between">
