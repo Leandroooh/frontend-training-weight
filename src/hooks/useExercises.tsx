@@ -6,13 +6,12 @@ import type { ExerciseEntry } from "./useWorkouts";
 
 type exercisePayload = {
   exercise: string;
-  series: number;
-  weight: number;
 };
 
 export function useExercises() {
-  const [exercisesList, setExercisesList] = useState<ExerciseEntry[]>([]);
   const [loading, setLoading] = useState(false);
+  const [exercisesList, setExercisesList] = useState<ExerciseEntry[]>([]);
+
   const token = Cookies.get("token");
 
   const fetchExercises = useCallback(

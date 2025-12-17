@@ -7,7 +7,26 @@ import { normalizeWorkoutDate } from "@/utils/normalizeWorkout";
 type WorkoutFilters = {
   fromDate?: string;
   toDate?: string;
-  query?: string;
+};
+
+type Pagination = {
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+};
+
+type PaginatedResponse<T> = {
+  data: T[];
+  pagination: Pagination;
+};
+
+type ExerciseEntry = {
+  id: string;
+  exercise: string;
+  series: number;
+  weight: number;
+  createdAt?: string;
 };
 
 type Workout = {
@@ -19,42 +38,21 @@ type Workout = {
   exercises?: ExerciseEntry[];
 };
 
-type PaginatedResponse<T> = {
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-  };
-  data: T[];
-};
-
-type DateRangeParams = {
-  fromDate?: string;
-  toDate?: string;
-};
-
-type ExerciseEntry = {
-  id: string;
-  exercise: string;
-  series: number;
-  weight: number;
-  createdAt?: string;
-};
-
-type createWorkoutData = {
+type CreateWorkoutData = {
   name: string;
   notes?: string;
   date: string;
 };
 
 export function useWorkouts() {
-  const [workoutList, setWorkoutList] = useState<Workout[]>([]);
   const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [workoutList, setWorkoutList] = useState<Workout[]>([]);
 
   const token = Cookies.get("token");
 
   const fetchWorkouts = useCallback(
-    async (params?: WorkoutFilters) => {
+    async (params?: WorkoutFilters & { page?: number }) => {
       setLoading(true);
       try {
         const response = await workoutApi.get<PaginatedResponse<Workout>>(
@@ -63,6 +61,7 @@ export function useWorkouts() {
             params: {
               from: params?.fromDate,
               to: params?.toDate,
+              page: params?.page ?? 1,
             },
             headers: {
               Authorization: `Bearer ${token}`,
@@ -70,11 +69,8 @@ export function useWorkouts() {
           }
         );
 
-        const data = Array.isArray(response.data.data)
-          ? response.data.data.map(normalizeWorkoutDate)
-          : [];
-
-        setWorkoutList(data);
+        setWorkoutList(response.data.data.map(normalizeWorkoutDate));
+        setPagination(response.data.pagination);
       } catch (err) {
         toast.error("Falha ao carregar treinos.");
         console.error(err);
@@ -86,7 +82,7 @@ export function useWorkouts() {
   );
 
   const createWorkout = useCallback(
-    async (payload: createWorkoutData) => {
+    async (payload: CreateWorkoutData) => {
       try {
         const response = await workoutApi.post<Workout>("/workout", payload, {
           headers: {
@@ -94,9 +90,9 @@ export function useWorkouts() {
           },
         });
 
-        setWorkoutList((currentData) => [
+        setWorkoutList((current) => [
           normalizeWorkoutDate(response.data),
-          ...currentData,
+          ...current,
         ]);
 
         toast.success("Treino criado com sucesso!");
@@ -119,8 +115,8 @@ export function useWorkouts() {
           },
         });
 
-        setWorkoutList((currentData) =>
-          currentData.filter((workout) => workout.id !== id)
+        setWorkoutList((current) =>
+          current.filter((workout) => workout.id !== id)
         );
 
         toast.success("Treino excluído com sucesso!");
@@ -133,7 +129,7 @@ export function useWorkouts() {
   );
 
   const fetchWorkoutsByDateRange = useCallback(
-    async (params: DateRangeParams) => {
+    async (params: WorkoutFilters) => {
       const response = await workoutApi.get<PaginatedResponse<Workout>>(
         "/workouts",
         {
@@ -147,13 +143,9 @@ export function useWorkouts() {
         }
       );
 
-      const data = Array.isArray(response.data.data)
-        ? response.data.data.map(normalizeWorkoutDate)
-        : [];
-
       return {
         pagination: response.data.pagination,
-        data,
+        data: response.data.data.map(normalizeWorkoutDate),
       };
     },
     [token]
@@ -165,6 +157,7 @@ export function useWorkouts() {
 
   return {
     workoutList,
+    pagination,
     loading,
     fetchWorkouts,
     createWorkout,
@@ -172,5 +165,4 @@ export function useWorkouts() {
     fetchWorkoutsByDateRange,
   };
 }
-
-export type { WorkoutFilters, Workout, ExerciseEntry, createWorkoutData };
+export type { Workout, ExerciseEntry, WorkoutFilters, CreateWorkoutData };
