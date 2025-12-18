@@ -73,12 +73,10 @@ function SidebarContent({
 export function Sidebar(props: SidebarProps) {
   return (
     <>
-      {/* DESKTOP */}
       <div className="hidden lg:block">
         <SidebarContent {...props} />
       </div>
 
-      {/* MOBILE */}
       <Sheet onOpenChange={props.onOpenChange} open={props.open}>
         <SheetContent className="p-0" side="left">
           <SidebarContent {...props} />

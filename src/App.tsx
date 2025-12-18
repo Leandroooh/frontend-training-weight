@@ -1,9 +1,12 @@
 import { createBrowserRouter } from "react-router-dom";
 import "./globals.css";
+
+import { DashboardLayoutApp } from "./layouts/DashboardLayout";
 import DashboardPage from "./pages/Dashboard";
 import { LoginPage } from "./pages/Login";
 import { RegisterPage } from "./pages/Register";
-import { PrivateRoute } from './utils/PrivateRoute';
+import { WorkoutPage } from "./pages/Workout";
+import { PrivateRoute } from "./utils/PrivateRoute";
 
 const router = createBrowserRouter([
   {
@@ -15,13 +18,23 @@ const router = createBrowserRouter([
     element: <LoginPage />,
   },
   {
-  path: "/dashboard",
-  element: (
-    <PrivateRoute>
-      <DashboardPage />
-    </PrivateRoute>
-  ),
-}
-
+    path: "/dashboard",
+    element: (
+      <PrivateRoute>
+        <DashboardLayoutApp />
+      </PrivateRoute>
+    ),
+    children: [
+      {
+        index: true, // /dashboard
+        element: <DashboardPage />,
+      },
+      {
+        path: "workout/:id", // /dashboard/workout/:id
+        element: <WorkoutPage />,
+      },
+    ],
+  },
 ]);
+
 export { router };
