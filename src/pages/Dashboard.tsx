@@ -1,16 +1,10 @@
 import { useState } from "react";
 import { WorkoutCard } from "@/components/dashboard/WorkoutCard";
-import {
-  useWorkouts,
-  type Workout,
-  type WorkoutFilters,
-} from "@/hooks/useWorkouts";
+import { useWorkouts, type WorkoutFilters } from "@/hooks/useWorkouts";
 
 export default function DashboardPage() {
   const { workoutList, pagination, loading, fetchWorkouts, deleteWorkout } =
     useWorkouts();
-
-  const [_selected, setSelected] = useState<Workout | null>(null);
 
   const [page, setPage] = useState(1);
   const [filters, _setFilters] = useState<WorkoutFilters>({});
@@ -95,12 +89,7 @@ export default function DashboardPage() {
 
             {!loading &&
               workoutList.map((w) => (
-                <WorkoutCard
-                  key={w.id}
-                  onDelete={deleteCard}
-                  onOpen={(wk) => setSelected(wk)}
-                  workout={w}
-                />
+                <WorkoutCard key={w.id} onDelete={deleteCard} workout={w} />
               ))}
           </div>
         </div>

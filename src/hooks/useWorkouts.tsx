@@ -1,8 +1,12 @@
 import Cookies from "js-cookie";
 import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { workoutApi } from "@/services/api";
-import { normalizeWorkoutDate } from "@/utils/normalizeWorkout";
+import {
+  normalizeWorkoutDate,
+  normalizeWorkoutDateById,
+} from "@/utils/normalizeWorkout";
 
 type WorkoutFilters = {
   fromDate?: string;
@@ -24,7 +28,7 @@ type PaginatedResponse<T> = {
 type ExerciseEntry = {
   id: string;
   exercise: string;
-  series: number;
+  set: number;
   weight: number;
   createdAt?: string;
 };
@@ -38,6 +42,16 @@ type Workout = {
   exercises?: ExerciseEntry[];
 };
 
+type WorkoutDetails = {
+  id: string;
+  name: string;
+  date: string;
+  notes?: string | null;
+  exerciseEntries?: ExerciseEntry[];
+  createdAt: string;
+  updatedAt: string;
+};
+
 type CreateWorkoutData = {
   name: string;
   notes?: string;
@@ -45,6 +59,7 @@ type CreateWorkoutData = {
 };
 
 export function useWorkouts() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [workoutList, setWorkoutList] = useState<Workout[]>([]);
@@ -79,6 +94,32 @@ export function useWorkouts() {
       }
     },
     [token]
+  );
+
+  const fetchWorkoutById = useCallback(
+    async (id: string): Promise<WorkoutDetails | null> => {
+      setLoading(true);
+      try {
+        const response = await workoutApi.get<WorkoutDetails>(
+          `/workout/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        return normalizeWorkoutDateById(response.data);
+      } catch (err) {
+        navigate("/dashboard");
+        console.error(err);
+        toast.error("Falha ao carregar treino.");
+        return null;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [token, navigate]
   );
 
   const createWorkout = useCallback(
@@ -160,9 +201,16 @@ export function useWorkouts() {
     pagination,
     loading,
     fetchWorkouts,
+    fetchWorkoutById,
     createWorkout,
     deleteWorkout,
     fetchWorkoutsByDateRange,
   };
 }
-export type { Workout, ExerciseEntry, WorkoutFilters, CreateWorkoutData };
+export type {
+  Workout,
+  ExerciseEntry,
+  WorkoutFilters,
+  WorkoutDetails,
+  CreateWorkoutData,
+};

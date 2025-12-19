@@ -1,17 +1,21 @@
 import { Trash2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import type { Workout } from "@/hooks/useWorkouts";
 
-export function WorkoutCard({
-  workout,
-  onOpen,
-  onDelete,
-}: {
+type WorkoutCardProps = {
   workout: Workout;
-  onOpen: (w: Workout) => void;
   onDelete: (id: string) => void;
-}) {
+};
+
+export function WorkoutCard({ workout, onDelete }: WorkoutCardProps) {
+  const navigate = useNavigate();
+
   const count = workout.exercises?.length ?? 0;
   const date = workout.date ? workout.date.split("-").reverse().join("/") : "";
+
+  const handleOpen = () => {
+    navigate(`/dashboard/workout/${workout.id}`);
+  };
 
   return (
     <div className="group relative rounded border bg-background p-4 shadow-sm transition hover:shadow-md">
@@ -24,11 +28,7 @@ export function WorkoutCard({
         <Trash2 size={16} />
       </button>
 
-      <button
-        className="w-full text-left"
-        onClick={() => onOpen(workout)}
-        type="button"
-      >
+      <button className="w-full text-left" onClick={handleOpen} type="button">
         <h3 className="font-semibold text-lg leading-tight">{workout.name}</h3>
 
         <p className="mt-2 line-clamp-2 text-muted-foreground text-sm">

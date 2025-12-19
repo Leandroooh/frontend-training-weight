@@ -75,7 +75,7 @@ export function WorkoutModal({
                     <div>
                       <div className="font-medium">{exercise.exercise}</div>
                       <div className="text-muted-foreground text-xs">
-                        {exercise.series} séries • {exercise.weight} kg
+                        {exercise.set} séries • {exercise.weight} kg
                       </div>
                     </div>
 
