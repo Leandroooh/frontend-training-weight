@@ -28,6 +28,7 @@ export function CreateWorkoutDialog({
   const [name, setName] = useState("");
   const [notes, setNotes] = useState("");
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+
   const [loading, setLoading] = useState(false);
 
   const handleCreate = async () => {
@@ -37,7 +38,6 @@ export function CreateWorkoutDialog({
 
     try {
       setLoading(true);
-
       await onCreate({ name, notes, date });
 
       setName("");

@@ -1,4 +1,4 @@
-// layouts/DashboardLayout.tsx
+// layouts/DashboardLayoutApp.tsx
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { Header } from "@/components/dashboard/Header";
@@ -12,53 +12,15 @@ import {
 } from "@/hooks/useWorkouts";
 
 export function DashboardLayoutApp() {
-  const {
-    workoutList,
-    pagination,
-    loading,
-    fetchWorkouts,
-    createWorkout,
-    deleteWorkout,
-  } = useWorkouts();
+  const { workoutList, pagination, createWorkout, setCurrentPage } =
+    useWorkouts();
 
   const [createOpen, setCreateOpen] = useState(false);
   const [selected, setSelected] = useState<Workout | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const [page, setPage] = useState(1);
-  const [filters, setFilters] = useState<WorkoutFilters>({});
-
-  const handleFilter = (newFilters: WorkoutFilters) => {
-    setFilters(newFilters);
-    setPage(1);
-    fetchWorkouts({ ...newFilters, page: 1 });
-  };
-
-  const handleNextPage = () => {
-    if (!pagination) {
-      return;
-    }
-    if (page >= pagination.totalPages) {
-      return;
-    }
-
-    const next = page + 1;
-    setPage(next);
-    fetchWorkouts({ ...filters, page: next });
-  };
-
-  const handlePrevPage = () => {
-    if (page <= 1) {
-      return;
-    }
-
-    const prev = page - 1;
-    setPage(prev);
-    fetchWorkouts({ ...filters, page: prev });
-  };
-
-  const deleteCard = (id: string) => {
-    deleteWorkout(id);
+  const handleFilter = (_filters: WorkoutFilters) => {
+    setCurrentPage(1);
   };
 
   return (
@@ -74,26 +36,11 @@ export function DashboardLayoutApp() {
       <div className="flex flex-1 flex-col bg-muted/30">
         <Header onOpenSidebar={() => setSidebarOpen(true)} />
 
-        <Outlet
-          context={{
-            workoutList,
-            pagination,
-            loading,
-            page,
-            filters,
-            handleNextPage,
-            handlePrevPage,
-            deleteCard,
-            setSelected,
-          }}
-        />
+        <Outlet context={{ setSelected }} />
       </div>
 
       <CreateWorkoutDialog
-        onCreate={async (data) => {
-          await createWorkout(data);
-          fetchWorkouts({ ...filters, page });
-        }}
+        onCreate={createWorkout}
         onOpenChange={setCreateOpen}
         open={createOpen}
       />

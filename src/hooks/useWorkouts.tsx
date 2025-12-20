@@ -1,6 +1,13 @@
+// contexts/WorkoutsContext.tsx
+
 import Cookies from "js-cookie";
-import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { toast } from "sonner";
 import { workoutApi } from "@/services/api";
 import {
@@ -8,24 +15,23 @@ import {
   normalizeWorkoutDateById,
 } from "@/utils/normalizeWorkout";
 
-type WorkoutFilters = {
+/* =======================
+   Types
+======================= */
+
+export type WorkoutFilters = {
   fromDate?: string;
   toDate?: string;
 };
 
-type Pagination = {
+export type Pagination = {
   page: number;
   pageSize: number;
   totalItems: number;
   totalPages: number;
 };
 
-type PaginatedResponse<T> = {
-  data: T[];
-  pagination: Pagination;
-};
-
-type ExerciseEntry = {
+export type ExerciseEntry = {
   id: string;
   exercise: string;
   set: number;
@@ -33,7 +39,7 @@ type ExerciseEntry = {
   createdAt?: string;
 };
 
-type Workout = {
+export type Workout = {
   id: string;
   name: string;
   date: string;
@@ -42,175 +48,130 @@ type Workout = {
   exercises?: ExerciseEntry[];
 };
 
-type WorkoutDetails = {
-  id: string;
-  name: string;
-  date: string;
-  notes?: string | null;
-  exerciseEntries?: ExerciseEntry[];
-  createdAt: string;
-  updatedAt: string;
-};
-
-type CreateWorkoutData = {
+export type CreateWorkoutData = {
   name: string;
   notes?: string;
   date: string;
 };
 
-export function useWorkouts() {
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [pagination, setPagination] = useState<Pagination | null>(null);
-  const [workoutList, setWorkoutList] = useState<Workout[]>([]);
+export type WorkoutDetails = {
+  id: string;
+  name: string;
+  date: string | null;
+  exercises: ExerciseEntry[];
+  notes?: string | null;
+};
 
+type WorkoutsContextValue = {
+  workoutList: Workout[];
+  pagination: Pagination | null;
+  loading: boolean;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+  createWorkout: (data: CreateWorkoutData) => Promise<void>;
+  deleteWorkout: (id: string) => Promise<void>;
+  fetchWorkoutById: (id: string) => Promise<WorkoutDetails | null>;
+};
+
+/* =======================
+   Context
+======================= */
+
+const WorkoutsContext = createContext<WorkoutsContextValue | null>(null);
+
+export function WorkoutsProvider({ children }: { children: React.ReactNode }) {
   const token = Cookies.get("token");
 
+  const [workoutList, setWorkoutList] = useState<Workout[]>([]);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
   const fetchWorkouts = useCallback(
-    async (params?: WorkoutFilters & { page?: number }) => {
+    async (page = 1) => {
       setLoading(true);
       try {
-        const response = await workoutApi.get<PaginatedResponse<Workout>>(
-          "/workouts",
-          {
-            params: {
-              from: params?.fromDate,
-              to: params?.toDate,
-              page: params?.page ?? 1,
-            },
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await workoutApi.get("/workouts", {
+          params: { page },
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         setWorkoutList(response.data.data.map(normalizeWorkoutDate));
         setPagination(response.data.pagination);
-      } catch (err) {
-        toast.error("Falha ao carregar treinos.");
-        console.error(err);
+      } catch {
+        toast.error("Falha ao carregar treinos");
       } finally {
         setLoading(false);
       }
     },
     [token]
-  );
-
-  const fetchWorkoutById = useCallback(
-    async (id: string): Promise<WorkoutDetails | null> => {
-      setLoading(true);
-      try {
-        const response = await workoutApi.get<WorkoutDetails>(
-          `/workout/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        return normalizeWorkoutDateById(response.data);
-      } catch (err) {
-        navigate("/dashboard");
-        console.error(err);
-        toast.error("Falha ao carregar treino.");
-        return null;
-      } finally {
-        setLoading(false);
-      }
-    },
-    [token, navigate]
   );
 
   const createWorkout = useCallback(
-    async (payload: CreateWorkoutData) => {
-      try {
-        const response = await workoutApi.post<Workout>("/workout", payload, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+    async (data: CreateWorkoutData) => {
+      await workoutApi.post("/workout", data, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-        setWorkoutList((current) => [
-          normalizeWorkoutDate(response.data),
-          ...current,
-        ]);
-
-        toast.success("Treino criado com sucesso!");
-        return response.data;
-      } catch (err) {
-        toast.error("Erro ao criar treino");
-        console.error(err);
-        throw err;
-      }
+      await fetchWorkouts(1);
+      setCurrentPage(1);
     },
-    [token]
+    [token, fetchWorkouts]
   );
 
   const deleteWorkout = useCallback(
     async (id: string) => {
-      try {
-        await workoutApi.delete(`/workout/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+      await workoutApi.delete(`/workout/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-        setWorkoutList((current) =>
-          current.filter((workout) => workout.id !== id)
-        );
-
-        toast.success("Treino excluído com sucesso!");
-      } catch (err) {
-        toast.error("Erro ao excluir treino");
-        console.error(err);
-      }
+      await fetchWorkouts(currentPage);
     },
-    [token]
+    [token, fetchWorkouts, currentPage]
   );
 
-  const fetchWorkoutsByDateRange = useCallback(
-    async (params: WorkoutFilters) => {
-      const response = await workoutApi.get<PaginatedResponse<Workout>>(
-        "/workouts",
-        {
-          params: {
-            from: params.fromDate,
-            to: params.toDate,
-          },
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  const fetchWorkoutById = useCallback(
+    async (id: string): Promise<WorkoutDetails | null> => {
+      try {
+        const response = await workoutApi.get(`/workout/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-      return {
-        pagination: response.data.pagination,
-        data: response.data.data.map(normalizeWorkoutDate),
-      };
+        return normalizeWorkoutDateById(response.data);
+      } catch {
+        toast.error("Falha ao carregar treino");
+        return null;
+      }
     },
     [token]
   );
 
   useEffect(() => {
-    fetchWorkouts();
-  }, [fetchWorkouts]);
+    fetchWorkouts(currentPage);
+  }, [fetchWorkouts, currentPage]);
 
-  return {
-    workoutList,
-    pagination,
-    loading,
-    fetchWorkouts,
-    fetchWorkoutById,
-    createWorkout,
-    deleteWorkout,
-    fetchWorkoutsByDateRange,
-  };
+  return (
+    <WorkoutsContext.Provider
+      value={{
+        deleteWorkout,
+        workoutList,
+        pagination,
+        loading,
+        currentPage,
+        setCurrentPage,
+        createWorkout,
+        fetchWorkoutById,
+      }}
+    >
+      {children}
+    </WorkoutsContext.Provider>
+  );
 }
-export type {
-  Workout,
-  ExerciseEntry,
-  WorkoutFilters,
-  WorkoutDetails,
-  CreateWorkoutData,
-};
+
+export function useWorkouts() {
+  const ctx = useContext(WorkoutsContext);
+  if (!ctx) {
+    throw new Error("useWorkouts must be used within a WorkoutsProvider");
+  }
+  return ctx;
+}

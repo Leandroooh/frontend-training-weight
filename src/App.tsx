@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import "./globals.css";
 
+import { WorkoutsProvider } from "./hooks/useWorkouts";
 import { DashboardLayoutApp } from "./layouts/DashboardLayout";
 import DashboardPage from "./pages/Dashboard";
 import { LoginPage } from "./pages/Login";
@@ -21,7 +22,9 @@ const router = createBrowserRouter([
     path: "/dashboard",
     element: (
       <PrivateRoute>
-        <DashboardLayoutApp />
+        <WorkoutsProvider>
+          <DashboardLayoutApp />
+        </WorkoutsProvider>
       </PrivateRoute>
     ),
     children: [

@@ -1,39 +1,34 @@
-import { useState } from "react";
+/** biome-ignore-all lint/nursery/noLeakedRender: # */
 import { WorkoutCard } from "@/components/dashboard/WorkoutCard";
-import { useWorkouts, type WorkoutFilters } from "@/hooks/useWorkouts";
+import { useWorkouts, type Workout } from "@/hooks/useWorkouts";
 
 export default function DashboardPage() {
-  const { workoutList, pagination, loading, fetchWorkouts, deleteWorkout } =
-    useWorkouts();
-
-  const [page, setPage] = useState(1);
-  const [filters, _setFilters] = useState<WorkoutFilters>({});
+  const {
+    workoutList,
+    pagination,
+    loading,
+    deleteWorkout,
+    currentPage,
+    setCurrentPage,
+  } = useWorkouts();
 
   const handleNextPage = () => {
     if (!pagination) {
       return;
     }
-    if (page >= pagination.totalPages) {
+    if (currentPage >= pagination.totalPages) {
       return;
     }
 
-    const next = page + 1;
-    setPage(next);
-    fetchWorkouts({ ...filters, page: next });
+    setCurrentPage(currentPage + 1);
   };
 
   const handlePrevPage = () => {
-    if (page <= 1) {
+    if (currentPage <= 1) {
       return;
     }
 
-    const prev = page - 1;
-    setPage(prev);
-    fetchWorkouts({ ...filters, page: prev });
-  };
-
-  const deleteCard = (id: string) => {
-    deleteWorkout(id);
+    setCurrentPage(currentPage - 1);
   };
 
   return (
@@ -43,7 +38,6 @@ export default function DashboardPage() {
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="font-semibold text-xl">Seus Treinos</h2>
 
-            {/** biome-ignore lint/nursery/noLeakedRender: <#> */}
             {pagination && (
               <div className="flex flex-col items-center gap-1 sm:flex-row sm:gap-4">
                 <span className="text-muted-foreground text-sm">
@@ -53,7 +47,7 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-2">
                   <button
                     className="text-sm disabled:opacity-50"
-                    disabled={page === 1 || loading}
+                    disabled={currentPage === 1 || loading}
                     onClick={handlePrevPage}
                     type="button"
                   >
@@ -62,7 +56,7 @@ export default function DashboardPage() {
 
                   <button
                     className="text-sm disabled:opacity-50"
-                    disabled={page === pagination.totalPages || loading}
+                    disabled={currentPage === pagination.totalPages || loading}
                     onClick={handleNextPage}
                     type="button"
                   >
@@ -74,7 +68,6 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {/** biome-ignore lint/nursery/noLeakedRender: <#> */}
             {loading && (
               <span className="text-muted-foreground text-sm">
                 Carregando treinos…
@@ -88,8 +81,8 @@ export default function DashboardPage() {
             )}
 
             {!loading &&
-              workoutList.map((w) => (
-                <WorkoutCard key={w.id} onDelete={deleteCard} workout={w} />
+              workoutList.map((w: Workout) => (
+                <WorkoutCard key={w.id} onDelete={deleteWorkout} workout={w} />
               ))}
           </div>
         </div>
