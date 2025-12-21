@@ -14,10 +14,7 @@ import {
   normalizeWorkoutDate,
   normalizeWorkoutDateById,
 } from "@/utils/normalizeWorkout";
-
-/* =======================
-   Types
-======================= */
+import type { ExerciseEntry } from "./useExercises";
 
 export type WorkoutFilters = {
   fromDate?: string;
@@ -31,21 +28,12 @@ export type Pagination = {
   totalPages: number;
 };
 
-export type ExerciseEntry = {
-  id: string;
-  exercise: string;
-  set: number;
-  weight: number;
-  createdAt?: string;
-};
-
 export type Workout = {
   id: string;
   name: string;
   date: string;
   userId: string;
   notes?: string | null;
-  exercises?: ExerciseEntry[];
 };
 
 export type CreateWorkoutData = {
@@ -72,10 +60,6 @@ type WorkoutsContextValue = {
   deleteWorkout: (id: string) => Promise<void>;
   fetchWorkoutById: (id: string) => Promise<WorkoutDetails | null>;
 };
-
-/* =======================
-   Context
-======================= */
 
 const WorkoutsContext = createContext<WorkoutsContextValue | null>(null);
 

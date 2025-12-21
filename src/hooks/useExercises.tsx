@@ -2,10 +2,34 @@ import Cookies from "js-cookie";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { workoutApi } from "@/services/api";
-import type { ExerciseEntry } from "./useWorkouts";
 
 type exercisePayload = {
   exercise: string;
+};
+
+export type ExerciseEntry = {
+  id: string;
+
+  exercise: string;
+  series: ExerciseSeries[];
+
+  createdAt: string;
+  updatedAt: string;
+
+  workoutId: string;
+};
+
+export type ExerciseSeries = {
+  id: string;
+
+  set: number;
+  reps: number;
+  seriesWeight: number;
+
+  createdAt: string;
+  updatedAt: string;
+
+  exerciseEntryId: string;
 };
 
 export function useExercises() {

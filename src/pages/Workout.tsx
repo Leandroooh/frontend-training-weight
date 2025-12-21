@@ -33,7 +33,12 @@ export function WorkoutPage() {
 
   return (
     <div className="flex flex-col gap-2">
-      <WorkoutInfo createdAt={date} id={workout.id} title={workout.name} />
+      <WorkoutInfo
+        createdAt={date}
+        id={workout.id}
+        notes={workout.notes ?? ""}
+        title={workout.name}
+      />
     </div>
   );
 }
