@@ -1,8 +1,13 @@
+// components/dashboard/Sidebar.tsx
+/** biome-ignore-all lint/nursery/noLeakedRender: weak */
 import { Dumbbell, PlusCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import type { WorkoutFilters } from "@/hooks/useWorkouts";
+
+const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 type SidebarProps = {
   open: boolean;
@@ -10,14 +15,26 @@ type SidebarProps = {
   onCreate: () => void;
   onFilter: (filters: WorkoutFilters) => void;
   totalWorkouts: number;
+  showFilters?: boolean; // 👈 novo
 };
+
+function isValidISODate(value: string) {
+  return ISO_DATE_REGEX.test(value);
+}
 
 function SidebarContent({
   onCreate,
   onFilter,
   totalWorkouts,
   onOpenChange,
+  showFilters = true,
 }: Omit<SidebarProps, "open">) {
+  const [filters, setFilters] = useState<WorkoutFilters>({});
+
+  useEffect(() => {
+    onFilter(filters);
+  }, [filters, onFilter]);
+
   return (
     <aside className="flex h-full w-72 flex-col gap-4 bg-neutral-950 px-4 py-8">
       <div>
@@ -27,23 +44,39 @@ function SidebarContent({
         </p>
       </div>
 
-      <div className="mt-4">
-        <h4 className="mb-2 font-semibold text-sm text-white">Filtros</h4>
-        <div className="flex flex-col gap-2">
-          <label htmlFor="fromDate">De</label>
-          <Input
-            id="fromDate"
-            onChange={(e) => onFilter({ fromDate: e.target.value })}
-            type="date"
-          />
-          <label htmlFor="toDate">Até</label>
-          <Input
-            id="toDate"
-            onChange={(e) => onFilter({ toDate: e.target.value })}
-            type="date"
-          />
+      {showFilters && (
+        <div className="mt-4">
+          <h4 className="mb-2 font-semibold text-sm text-white">Filtros</h4>
+
+          <div className="flex flex-col gap-2">
+            <label htmlFor="fromDate">De</label>
+            <Input
+              id="fromDate"
+              onChange={(e) => {
+                const value = e.target.value;
+                setFilters((prev) => ({
+                  ...prev,
+                  fromDate: value && isValidISODate(value) ? value : undefined,
+                }));
+              }}
+              type="date"
+            />
+
+            <label htmlFor="toDate">Até</label>
+            <Input
+              id="toDate"
+              onChange={(e) => {
+                const value = e.target.value;
+                setFilters((prev) => ({
+                  ...prev,
+                  toDate: value && isValidISODate(value) ? value : undefined,
+                }));
+              }}
+              type="date"
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="mt-6 flex items-center justify-center rounded-md bg-neutral-800 py-3">
         <Dumbbell className="mr-2 text-green-400" size={18} />
@@ -62,10 +95,6 @@ function SidebarContent({
         <PlusCircle className="mr-2 text-green-400" />
         Novo Treino
       </Button>
-
-      <div className="mt-auto flex items-center justify-center text-muted-foreground text-xs">
-        <p className="mt-2">© {new Date().getFullYear()} Dravyx • v0.1 MVP</p>
-      </div>
     </aside>
   );
 }

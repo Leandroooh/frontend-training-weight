@@ -10,7 +10,7 @@ export function useAuth() {
 
     if (!token) {
       setIsAuthenticated(false);
-      setLoading(false)
+      setLoading(false);
       return;
     }
     setIsAuthenticated(true);

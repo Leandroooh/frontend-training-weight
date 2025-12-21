@@ -12,17 +12,13 @@ import {
 } from "@/hooks/useWorkouts";
 
 export function DashboardLayoutApp() {
-  const { workoutList, pagination, createWorkout, setCurrentPage } =
-    useWorkouts();
+  const { workoutList, pagination, createWorkout } = useWorkouts();
 
   const [createOpen, setCreateOpen] = useState(false);
   const [selected, setSelected] = useState<Workout | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const handleFilter = (_filters: WorkoutFilters) => {
-    setCurrentPage(1);
-  };
-
+  const handleFilter = (_filters: WorkoutFilters) => "ok";
   return (
     <div className="flex h-screen">
       <Sidebar
