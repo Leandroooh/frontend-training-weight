@@ -34,6 +34,7 @@ export type Workout = {
   date: string;
   userId: string;
   notes?: string | null;
+  exercises: ExerciseEntry;
 };
 
 export type CreateWorkoutData = {

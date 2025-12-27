@@ -1,16 +1,22 @@
 import { Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import type { ExerciseEntry } from "@/hooks/useExercises";
 import type { Workout } from "@/hooks/useWorkouts";
 
 type WorkoutCardProps = {
   workout: Workout;
+  exercises: ExerciseEntry[];
   onDelete: (id: string) => void;
 };
 
-export function WorkoutCard({ workout, onDelete }: WorkoutCardProps) {
+export function WorkoutCard({
+  workout,
+  onDelete,
+  exercises,
+}: WorkoutCardProps) {
   const navigate = useNavigate();
 
-  const count = workout.exercises?.length ?? 0;
+  const count = exercises?.length ?? 0;
   const date = workout.date ? workout.date.split("-").reverse().join("/") : "";
 
   const handleOpen = () => {
@@ -18,7 +24,7 @@ export function WorkoutCard({ workout, onDelete }: WorkoutCardProps) {
   };
 
   return (
-    <div className="group relative rounded border bg-background p-4 shadow-sm transition hover:shadow-md">
+    <div className="group relative rounded border bg-background-secondary p-4 shadow-sm transition hover:shadow-md">
       <button
         aria-label="Excluir treino"
         className="absolute top-2 right-2 rounded bg-destructive/10 p-1 text-destructive transition-colors duration-500 hover:text-muted group-hover:opacity-100"
