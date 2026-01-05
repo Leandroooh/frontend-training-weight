@@ -1,6 +1,6 @@
 /** biome-ignore-all lint/nursery/noLeakedRender: <#> */
 import { Separator } from "@radix-ui/react-separator";
-import { ArrowLeft, Edit, Plus, Trash } from "lucide-react";
+import { ArrowLeft, Plus, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
@@ -101,29 +101,37 @@ export function WorkoutInfo({ id, title, createdAt, notes }: WorkoutProps) {
             <h2 className="font-bold text-xl tracking-tight">Exercícios</h2>
 
             <div className="flex w-full gap-2 sm:w-auto">
+              {" "}
               <input
                 className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring sm:w-56"
                 onChange={(e) => setExerciseName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && exerciseName.trim()) {
+                    if (!id) {
+                      return;
+                    }
+                    addExercise(id, { exercise: exerciseName.trim() });
+                    setExerciseName("");
+                  }
+                }}
                 placeholder="Nome do exercício..."
                 value={exerciseName}
-              />
-
+              />{" "}
               <Button
                 disabled={!exerciseName.trim()}
                 onClick={() => {
                   if (!id) {
                     return;
                   }
-
                   addExercise(id, { exercise: exerciseName.trim() });
                   setExerciseName("");
                 }}
                 size="sm"
                 variant="outline"
               >
-                <Plus className="mr-1 h-4 w-4" />
-                Novo
-              </Button>
+                {" "}
+                <Plus className="mr-1 h-4 w-4" /> Novo{" "}
+              </Button>{" "}
             </div>
           </div>
 
@@ -171,9 +179,9 @@ export function WorkoutInfo({ id, title, createdAt, notes }: WorkoutProps) {
                         >
                           <Plus className="h-3.5 w-3.5" />
                         </Button>
-                        <Button className="h-6 w-6" size="icon" variant="ghost">
+                        {/* <Button className="h-6 w-6" size="icon" variant="ghost">
                           <Edit className="h-3.5 w-3.5" />
-                        </Button>
+                        </Button> */}
                         <Button
                           className="h-6 w-6 text-red-500"
                           onClick={async () => {

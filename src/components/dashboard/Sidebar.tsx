@@ -27,7 +27,7 @@ function SidebarContent({
   onFilter,
   totalWorkouts,
   onOpenChange,
-  showFilters = true,
+  showFilters = false,
 }: Omit<SidebarProps, "open">) {
   const [filters, setFilters] = useState<WorkoutFilters>({});
 
