@@ -11,6 +11,7 @@ import {
   type ExerciseSeries,
   useExercises,
 } from "@/hooks/useExercises";
+import { CreateSeriesModal } from "./modals/CreateSeriesModal";
 
 type WorkoutProps = {
   id: string | null;
@@ -21,11 +22,26 @@ type WorkoutProps = {
 
 export function WorkoutInfo({ id, title, createdAt, notes }: WorkoutProps) {
   const navigate = useNavigate();
+
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>(
     {}
   );
-  const { exercisesList, fetchExercises, addExercise, loading } =
-    useExercises();
+  const [exerciseName, setExerciseName] = useState("");
+
+  const {
+    exercisesList,
+    fetchExercises,
+    addExercise,
+    deleteExercise,
+    addSeries,
+    loading,
+  } = useExercises();
+
+  useEffect(() => {
+    if (id) {
+      fetchExercises(id);
+    }
+  }, [id, fetchExercises]);
 
   const toggleExpand = (exerciseId: string) => {
     setExpandedCards((prev) => ({
@@ -34,11 +50,8 @@ export function WorkoutInfo({ id, title, createdAt, notes }: WorkoutProps) {
     }));
   };
 
-  useEffect(() => {
-    if (id) {
-      fetchExercises(id);
-    }
-  }, [id, fetchExercises]);
+  const [seriesModalOpen, setSeriesModalOpen] = useState(false);
+  const [activeExerciseId, setActiveExerciseId] = useState<string | null>(null);
 
   return (
     <main className="w-full max-w-6xl">
@@ -72,7 +85,7 @@ export function WorkoutInfo({ id, title, createdAt, notes }: WorkoutProps) {
           <h2 className="font-medium text-muted-foreground text-xs uppercase">
             Observações
           </h2>
-          {notes && notes.trim() !== "" ? (
+          {notes?.trim() ? (
             <p className="text-sm leading-relaxed">{notes}</p>
           ) : (
             <p className="text-muted-foreground text-sm">
@@ -83,27 +96,37 @@ export function WorkoutInfo({ id, title, createdAt, notes }: WorkoutProps) {
 
         <Separator />
 
-        {/* Exercícios */}
         <section className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="font-bold text-xl tracking-tight">Exercícios</h2>
-            <Button
-              aria-label="Adicionar exercício"
-              className="flex items-center gap-1"
-              onClick={() => {
-                if (id) {
-                  addExercise(id, { exercise: "Novo Exercício" });
-                }
-              }}
-              size="sm"
-              variant="outline"
-            >
-              <Plus className="h-4 w-4" />
-              <span className="text-sm">Novo</span>
-            </Button>
+
+            <div className="flex w-full gap-2 sm:w-auto">
+              <input
+                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring sm:w-56"
+                onChange={(e) => setExerciseName(e.target.value)}
+                placeholder="Nome do exercício..."
+                value={exerciseName}
+              />
+
+              <Button
+                disabled={!exerciseName.trim()}
+                onClick={() => {
+                  if (!id) {
+                    return;
+                  }
+
+                  addExercise(id, { exercise: exerciseName.trim() });
+                  setExerciseName("");
+                }}
+                size="sm"
+                variant="outline"
+              >
+                <Plus className="mr-1 h-4 w-4" />
+                Novo
+              </Button>
+            </div>
           </div>
 
-          {/* 🔹 Estados separados sem ternário aninhado */}
           {loading && (
             <p className="text-muted-foreground text-sm">
               Carregando exercícios...
@@ -112,8 +135,7 @@ export function WorkoutInfo({ id, title, createdAt, notes }: WorkoutProps) {
 
           {!loading && exercisesList.length === 0 && (
             <p className="text-muted-foreground text-sm">
-              Nenhum exercício cadastrado ainda. Clique em <strong>Novo</strong>{" "}
-              para adicionar.
+              Nenhum exercício cadastrado ainda.
             </p>
           )}
 
@@ -121,9 +143,8 @@ export function WorkoutInfo({ id, title, createdAt, notes }: WorkoutProps) {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
               {exercisesList.map((exercise: ExerciseEntry) => {
                 const isExpanded = expandedCards[exercise.id];
-                const seriesToShow = isExpanded
-                  ? exercise.series
-                  : exercise.series.slice(0, 3);
+                const series: ExerciseSeries[] = exercise.series ?? [];
+                const seriesToShow = isExpanded ? series : series.slice(0, 3);
 
                 return (
                   <Card className="flex flex-col" key={exercise.id}>
@@ -133,37 +154,32 @@ export function WorkoutInfo({ id, title, createdAt, notes }: WorkoutProps) {
                           {exercise.exercise}
                         </CardTitle>
                         <Badge variant="secondary">
-                          {exercise.series.length} séries
+                          {series.length} séries
                         </Badge>
                       </div>
 
                       <div className="mt-1 flex gap-1">
+                        {/* Botão corrigido para abrir modal */}
                         <Button
-                          aria-label="Adicionar série"
-                          className="h-6 w-6 p-0"
-                          onClick={() =>
-                            console.log("Adicionar série", exercise.id)
-                          }
+                          className="h-6 w-6"
+                          onClick={() => {
+                            setActiveExerciseId(exercise.id);
+                            setSeriesModalOpen(true);
+                          }}
+                          size="icon"
                           variant="ghost"
                         >
                           <Plus className="h-3.5 w-3.5" />
                         </Button>
-                        <Button
-                          aria-label="Editar exercício"
-                          className="h-6 w-6 p-0"
-                          onClick={() =>
-                            console.log("Editar exercício", exercise.id)
-                          }
-                          variant="ghost"
-                        >
+                        <Button className="h-6 w-6" size="icon" variant="ghost">
                           <Edit className="h-3.5 w-3.5" />
                         </Button>
                         <Button
-                          aria-label="Deletar exercício"
-                          className="h-6 w-6 p-0 text-red-500 hover:text-red-600"
-                          onClick={() =>
-                            console.log("Deletar exercício", exercise.id)
-                          }
+                          className="h-6 w-6 text-red-500"
+                          onClick={async () => {
+                            await deleteExercise(exercise.id);
+                          }}
+                          size="icon"
                           variant="ghost"
                         >
                           <Trash className="h-3.5 w-3.5" />
@@ -172,7 +188,7 @@ export function WorkoutInfo({ id, title, createdAt, notes }: WorkoutProps) {
                     </CardHeader>
 
                     <CardContent className="space-y-1 pt-1">
-                      {seriesToShow.map((set: ExerciseSeries) => (
+                      {seriesToShow.map((set) => (
                         <div
                           className="flex items-center justify-between border-b py-0.5 text-xs last:border-0"
                           key={set.id}
@@ -197,17 +213,15 @@ export function WorkoutInfo({ id, title, createdAt, notes }: WorkoutProps) {
                         </div>
                       ))}
 
-                      {exercise.series.length > 3 && (
-                        <div className="pt-1">
-                          <Button
-                            className="px-0 text-xs"
-                            onClick={() => toggleExpand(exercise.id)}
-                            size="sm"
-                            variant="link"
-                          >
-                            {isExpanded ? "Ver menos" : "Ver mais"}
-                          </Button>
-                        </div>
+                      {series.length > 3 && (
+                        <Button
+                          className="px-0 text-xs"
+                          onClick={() => toggleExpand(exercise.id)}
+                          size="sm"
+                          variant="link"
+                        >
+                          {isExpanded ? "Ver menos" : "Ver mais"}
+                        </Button>
                       )}
                     </CardContent>
                   </Card>
@@ -223,6 +237,22 @@ export function WorkoutInfo({ id, title, createdAt, notes }: WorkoutProps) {
           ID do treino: {id}
         </footer>
       </section>
+
+      <CreateSeriesModal
+        onCreate={async (data) => {
+          if (!activeExerciseId) {
+            return;
+          }
+          await addSeries(activeExerciseId, data);
+        }}
+        onOpenChange={(open) => {
+          setSeriesModalOpen(open);
+          if (!open) {
+            setActiveExerciseId(null);
+          }
+        }}
+        open={seriesModalOpen}
+      />
     </main>
   );
 }

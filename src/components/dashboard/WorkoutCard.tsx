@@ -5,7 +5,7 @@ import type { Workout } from "@/hooks/useWorkouts";
 
 type WorkoutCardProps = {
   workout: Workout;
-  exercises: ExerciseEntry[];
+  exercises?: ExerciseEntry[];
   onDelete: (id: string) => void;
 };
 

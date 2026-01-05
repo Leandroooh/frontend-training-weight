@@ -61,7 +61,7 @@ export function useExercises() {
     async (id: string, payload: exercisePayload) => {
       try {
         const response = await workoutApi.post<ExerciseEntry>(
-          `/workout/${id}/exercise`,
+          `/workout/${id}/exercises`,
           payload,
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -77,11 +77,63 @@ export function useExercises() {
     [token]
   );
 
+  const deleteExercise = useCallback(
+    async (id: string) => {
+      try {
+        await workoutApi.delete(`/exercises/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setExercisesList((currentData) =>
+          currentData.filter((exercise) => exercise.id !== id)
+        );
+        toast.success("Exercício excluido!");
+      } catch (err) {
+        console.error(err);
+        toast.error("Erro ao excluir exercício!");
+      }
+    },
+    [token]
+  );
+
+  const addSeries = useCallback(
+    async (
+      exerciseEntryId: string,
+      payload: { set: number; reps: number; seriesWeight: number }
+    ) => {
+      try {
+        const response = await workoutApi.post(
+          `/exercise/${exerciseEntryId}/series`,
+          payload,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setExercisesList((currentData) =>
+          currentData.map((exercise) =>
+            exercise.id === exerciseEntryId
+              ? {
+                  ...exercise,
+                  series: [...(exercise.series ?? []), response.data],
+                }
+              : exercise
+          )
+        );
+        toast.success("Série adicionada!");
+        return response.data;
+      } catch (err) {
+        console.error(err);
+        toast.error("Erro ao adicionar série!");
+        throw err;
+      }
+    },
+    [token]
+  );
+
   return {
     exercisesList,
     loading,
     fetchExercises,
     addExercise,
+    deleteExercise,
+    addSeries,
     setExercisesList,
   };
 }
