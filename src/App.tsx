@@ -4,6 +4,7 @@ import "./globals.css";
 import { WorkoutsProvider } from "./hooks/useWorkouts";
 import { DashboardLayoutApp } from "./layouts/DashboardLayout";
 import DashboardPage from "./pages/Dashboard";
+import { Landing } from "./pages/LandingPage";
 import { LoginPage } from "./pages/Login";
 import { RegisterPage } from "./pages/Register";
 import { WorkoutPage } from "./pages/Workout";
@@ -12,6 +13,10 @@ import { PrivateRoute } from "./utils/PrivateRoute";
 const router = createBrowserRouter([
   {
     path: "/",
+    element: <Landing />,
+  },
+  {
+    path: "/register",
     element: <RegisterPage />,
   },
   {

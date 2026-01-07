@@ -199,7 +199,7 @@ export function WorkoutInfo({ id, title, createdAt, notes }: WorkoutProps) {
                       {seriesToShow.map((set) => (
                         <div
                           className="flex items-center justify-between border-b py-0.5 text-xs last:border-0"
-                          key={set.id}
+                          key={set.set}
                         >
                           <span className="text-muted-foreground">
                             Série {set.set}

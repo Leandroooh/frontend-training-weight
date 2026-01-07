@@ -127,6 +127,28 @@ export function useExercises() {
     [token]
   );
 
+  const deleteSeries = useCallback(
+    async (seriesId: string) => {
+      try {
+        const response = await workoutApi.delete(`/series/${seriesId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        setExercisesList((currentData) =>
+          currentData.filter((series) => series.id !== seriesId)
+        );
+
+        toast.success("Série deletada!");
+        return response.data;
+      } catch (err) {
+        console.error(err);
+        toast.error("Erro ao adicionar série!");
+        throw err;
+      }
+    },
+    [token]
+  );
+
   return {
     exercisesList,
     loading,
@@ -134,6 +156,7 @@ export function useExercises() {
     addExercise,
     deleteExercise,
     addSeries,
+    deleteSeries,
     setExercisesList,
   };
 }
