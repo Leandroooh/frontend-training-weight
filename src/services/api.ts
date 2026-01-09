@@ -1,5 +1,5 @@
 import axios from "axios";
 
 export const workoutApi = axios.create({
-  baseURL: "http://localhost:3030",
+  baseURL: "https://backend-training-weight-deploy.onrender.com",
 });
