@@ -100,7 +100,7 @@ export function LoginPage() {
                 />
                 <Link
                   className="ml-auto text-sm underline-offset-4 hover:underline"
-                  to="/"
+                  to="/register"
                 >
                   Não possui conta?
                 </Link>
