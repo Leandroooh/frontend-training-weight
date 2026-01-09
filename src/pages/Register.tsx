@@ -81,7 +81,7 @@ export function RegisterPage() {
                   disabled={loading}
                   id="username"
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enzo"
+                  placeholder="Usuário"
                   required
                   value={username}
                 />
