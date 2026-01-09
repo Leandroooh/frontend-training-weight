@@ -14,8 +14,8 @@ export function normalizeWorkoutDateById(
 ): WorkoutDetails {
   return {
     ...workout,
-    date: workout.date.includes("T")
-      ? workout.date.split("T")[0]
+    date: workout.date?.includes("T")
+      ? workout.date?.split("T")[0]
       : workout.date,
   };
 }
