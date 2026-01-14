@@ -1,4 +1,4 @@
-/** CreateSeriesModal.tsx */
+/** biome-ignore-all lint/nursery/noLeakedRender: biome ignore */
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -88,7 +88,7 @@ export function CreateSeriesModal({
               onChange={(e) => setSeriesWeight(Number(e.target.value))}
               step="0.5"
               type="number"
-              value={seriesWeight}
+              value={seriesWeight === 0 ? "" : seriesWeight}
             />
           </div>
         </div>
