@@ -76,7 +76,7 @@ export function CreateSeriesModal({
               min={1}
               onChange={(e) => setReps(Number(e.target.value))}
               type="number"
-              value={reps}
+              value={reps === 0 ? "" : reps}
             />
           </div>
 
