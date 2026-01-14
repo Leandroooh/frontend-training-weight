@@ -64,8 +64,9 @@ export function CreateSeriesModal({
               id="set"
               min={1}
               onChange={(e) => setSet(Number(e.target.value))}
+              placeholder="1"
               type="number"
-              value={set}
+              value={set === 0 ? "" : set}
             />
           </div>
 
@@ -75,6 +76,7 @@ export function CreateSeriesModal({
               id="reps"
               min={1}
               onChange={(e) => setReps(Number(e.target.value))}
+              placeholder="10"
               type="number"
               value={reps === 0 ? "" : reps}
             />
@@ -86,6 +88,7 @@ export function CreateSeriesModal({
               id="weight"
               min={0}
               onChange={(e) => setSeriesWeight(Number(e.target.value))}
+              placeholder="10"
               step="0.5"
               type="number"
               value={seriesWeight === 0 ? "" : seriesWeight}
